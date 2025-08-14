@@ -1,9 +1,10 @@
 package main
 
 import(
-	"os"
 	"log"
 	"bytes"
+	"errors"
+	"io"
 	"io/ioutil"
 	"path/filepath"
 	
@@ -59,22 +60,15 @@ func createMosaic(ratio float64, img image.Image) image.Image {
 	return imaging.Resize(down, int(w), int(h), imaging.NearestNeighbor)
 }
 
-func saveImage(ext string, img image.Image) {
-	//Ready File for save
-	f, err := os.Create("./mosaic" + ext)
-	if err != nil {
-    	log.Fatal(err)
-	}
-	defer f.Close()
-	
-	//Save 
-	var saveErr error
-	if ext == "jpeg" {
-		saveErr = jpeg.Encode(f, img, nil);
-	} else {
-		saveErr = png.Encode(f, img);
-	}
-	if saveErr != nil {
-		log.Fatal(saveErr)
+func saveImage(w io.Writer, img image.Image) error {
+	switch ext {
+		case ".jpeg":
+			return jpeg.Encode(w, img, nil)
+		case ".jpg":
+			return jpeg.Encode(w, img, nil)
+		case ".png":
+			return png.Encode(w, img)
+		default:
+			return errors.New("Invalid extension: " + ext)
 	}
 }

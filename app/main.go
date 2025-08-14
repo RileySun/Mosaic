@@ -1,7 +1,7 @@
 package main
 
 import(	
-	//"log"
+	"log"
 	"strconv"
 	
 	"fyne.io/fyne/v2"
@@ -14,8 +14,9 @@ import(
 )
 
 //Globals
-var window fyne.Window
 var mosaicRatio float64 = 0.05
+var ext string = ".png"
+var window fyne.Window
 var borderLine *canvas.Line
 var inputImage, outputImage *canvas.Image
 
@@ -62,12 +63,10 @@ func mainScreen() *fyne.Container {
 	title := widget.NewLabel("Mosaic Maker")
 	titleContent := container.NewVBox(title, borderLine)
 	
-	
 	return container.NewBorder(titleContent, nil, nil, nil, content)
 }
 
 func inputScreen() *fyne.Container {
-	//
 	label := widget.NewLabel("Input Image")
 	
 	button := widget.NewButton("Select Image", func() {
@@ -108,7 +107,6 @@ func settingsScreen() *fyne.Container {
 		slider.Value = mosaicRatio
 		mosaicEffect()
 	}
-
 	
 	content := container.NewVBox(label, slider, entry)
 	
@@ -118,9 +116,7 @@ func settingsScreen() *fyne.Container {
 func outputScreen() *fyne.Container {
 	label := widget.NewLabel("Output Image")
 	
-	button := widget.NewButton("Save Image", func() {
-		
-	})
+	button := widget.NewButton("Save Image", openSaveFile)
 	
 	content := container.NewVBox(label, button, outputImage)
 	
@@ -139,6 +135,7 @@ func onSelectImage(reader fyne.URIReadCloser, err error) {
 	}
 	
 	//Change input image
+	ext = getExt(reader.URI().Path())
 	inputImage.Image = getImage(reader.URI().Path())
 	inputImage.Refresh()
 	
@@ -149,4 +146,29 @@ func onSelectImage(reader fyne.URIReadCloser, err error) {
 func mosaicEffect() {
 	outputImage.Image = createMosaic(mosaicRatio, inputImage.Image)
 	outputImage.Refresh()
+}
+
+func openSaveFile() {
+	dialog.ShowFileSave(func(writer fyne.URIWriteCloser, err error) {
+		if writer == nil {
+			return
+		}
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer writer.Close()
+		
+		ext := getExt(writer.URI().Extension())
+		if ext != "png" || ext != "jpg" || ext != "jpeg" {
+			info := dialog.NewInformation("Invalid Extension", "Saved file must use a valid image extension. (Example: png, jpeg, jpg)", window)
+			info.SetOnClosed(openSaveFile)
+			info.Show()
+			return
+		} else {
+			err = saveImage(writer, outputImage.Image)	
+			if err != nil {
+				log.Println(err)
+			}
+		}
+	}, window)
 }
