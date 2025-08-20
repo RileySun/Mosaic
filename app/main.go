@@ -9,6 +9,7 @@ import(
 	//"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/dialog"
+	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
 	"fyne.io/fyne/v2/container"
 )
@@ -56,18 +57,12 @@ func mainScreen() *fyne.Container {
 	settings := settingsScreen()
 	output := outputScreen()
 	
-	//Container
-	content := container.NewHBox(input, settings, output)
-	
-	//Title
-	title := widget.NewLabel("Mosaic Maker")
-	titleContent := container.NewVBox(title, borderLine)
-	
-	return container.NewBorder(titleContent, nil, nil, nil, content)
+	return container.NewAdaptiveGrid(3, input, settings, output)
 }
 
 func inputScreen() *fyne.Container {
 	label := widget.NewLabel("Input Image")
+	label.Alignment = 1
 	
 	button := widget.NewButton("Select Image", func() {
 		dialog.ShowFileOpen(onSelectImage , window)
@@ -75,14 +70,16 @@ func inputScreen() *fyne.Container {
 	
 	content := container.NewVBox(label, button, inputImage)
 	
-	return container.NewHBox(content)
+	return container.NewCenter(content)
 }
 
 func settingsScreen() *fyne.Container {
+	spacer := layout.NewSpacer()
 	label := widget.NewLabel("Mosaic Settings")
+	label.Alignment = 1
 	
 	//Slider
-	slider := widget.NewSlider(0.0001, 0.25)
+	slider := widget.NewSlider(0.0001, 0.5)
 	slider.Step = 0.00001
 	slider.Value = mosaicRatio
 	
@@ -108,19 +105,20 @@ func settingsScreen() *fyne.Container {
 		mosaicEffect()
 	}
 	
-	content := container.NewVBox(label, slider, entry)
+	content := container.NewVBox(spacer, label, slider, entry, spacer)
 	
-	return container.NewHBox(content)
+	return container.NewStack(content)
 }
 
 func outputScreen() *fyne.Container {
 	label := widget.NewLabel("Output Image")
+	label.Alignment = 1
 	
 	button := widget.NewButton("Save Image", openSaveFile)
 	
 	content := container.NewVBox(label, button, outputImage)
 	
-	return container.NewHBox(content)
+	return container.NewCenter(content)
 }
 
 //Actions
