@@ -1,6 +1,7 @@
 package main
 
 import(	
+	"os"
 	"log"
 	"strconv"
 	
@@ -15,7 +16,7 @@ import(
 )
 
 //Globals
-var mosaicRatio float64 = 0.05
+var mosaicRatio float64 = 0.12
 var ext string = ".png"
 var window fyne.Window
 var borderLine *canvas.Line
@@ -102,6 +103,7 @@ func settingsScreen() *fyne.Container {
 		}
 		mosaicRatio := newRatio
 		slider.Value = mosaicRatio
+		slider.Refresh()
 		mosaicEffect()
 	}
 	
@@ -157,10 +159,12 @@ func openSaveFile() {
 		defer writer.Close()
 		
 		ext := getExt(writer.URI().Extension())
-		if ext != "png" || ext != "jpg" || ext != "jpeg" {
+		if ext != ".png" && ext != ".jpg" && ext != ".jpeg" {
 			info := dialog.NewInformation("Invalid Extension", "Saved file must use a valid image extension. (Example: png, jpeg, jpg)", window)
 			info.SetOnClosed(openSaveFile)
 			info.Show()
+			log.Println(writer.URI().Path())
+			os.Remove(writer.URI().Path())
 			return
 		} else {
 			err = saveImage(writer, outputImage.Image)	
