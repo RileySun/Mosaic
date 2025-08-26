@@ -16,15 +16,18 @@ import(
 )
 
 //Globals
-var mosaicRatio float64 = 0.12
+var rawRatio, mosaicRatio float64 = 1.0, 0.25
 var ext string = ".png"
 var window fyne.Window
 var borderLine *canvas.Line
-var inputImage, outputImage *canvas.Image
+var rawImage, inputImage, outputImage *canvas.Image
 
 //Init
 func init() {
 	borderLine = canvas.NewLine(WHITE)
+	
+	//Raw Image
+	rawImage = canvas.NewImageFromImage(getDefaultImage())
 	
 	//Input Image
 	inputImage = canvas.NewImageFromImage(getDefaultImage())
@@ -40,7 +43,7 @@ func init() {
 
 //Main
 func main() {
-	myApp := app.New()
+	myApp := app.NewWithID("com.sunshine.mosaic")
 	window = myApp.NewWindow("Mosaic Maker v0.1")
 	
 	
@@ -136,7 +139,8 @@ func onSelectImage(reader fyne.URIReadCloser, err error) {
 	
 	//Change input image
 	ext = getExt(reader.URI().Path())
-	inputImage.Image = getImage(reader.URI().Path())
+	rawImage.Image = getImage(reader.URI().Path())
+	inputImage.Image = previewImage(rawImage.Image)
 	inputImage.Refresh()
 	
 	//Mosaic and set Output
@@ -167,7 +171,8 @@ func openSaveFile() {
 			os.Remove(writer.URI().Path())
 			return
 		} else {
-			err = saveImage(writer, outputImage.Image)	
+			output := createMosaic(mosaicRatio / rawRatio, rawImage.Image)
+			err = saveImage(writer, output)	
 			if err != nil {
 				log.Println(err)
 			}

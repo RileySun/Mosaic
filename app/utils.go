@@ -50,6 +50,27 @@ func getImage(path string) image.Image {
 	return img
 }
 
+func previewImage(img image.Image) image.Image {
+	//Get Size
+	size := img.Bounds()
+	w, h := float64(size.Max.X), float64(size.Max.Y)
+	
+	//Get Ratio
+	rawRatio = 1.0
+	if w > 300 || h > 300 {
+		if w > 300 {
+			rawRatio = w/300
+		}
+		
+		if h/rawRatio > 300 {
+			rawRatio = h/300/rawRatio
+		}
+	}
+	
+	//Resize
+	return imaging.Resize(img, int(w/rawRatio), int(h/rawRatio), imaging.NearestNeighbor)
+}
+
 func createMosaic(ratio float64, img image.Image) image.Image {
 	//Get Size
 	size := img.Bounds()
