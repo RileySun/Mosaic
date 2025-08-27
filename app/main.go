@@ -16,7 +16,7 @@ import(
 )
 
 //Globals
-var rawRatio, mosaicRatio float64 = 1.0, 0.25
+var rawRatio, mosaicRatio float64 = 1.0, 0.5
 var ext string = ".png"
 var window fyne.Window
 var borderLine *canvas.Line
@@ -45,7 +45,6 @@ func init() {
 func main() {
 	myApp := app.NewWithID("com.sunshine.mosaic")
 	window = myApp.NewWindow("Mosaic Maker v0.1")
-	
 	
 	content := mainScreen()
 	
@@ -83,19 +82,20 @@ func settingsScreen() *fyne.Container {
 	label.Alignment = 1
 	
 	//Slider
-	slider := widget.NewSlider(0.0001, 0.5)
-	slider.Step = 0.00001
+	slider := widget.NewSlider(0.005, 1.0)
+	slider.Step = 0.0001
 	slider.Value = mosaicRatio
 	
 	//Entry
 	entry :=  widget.NewEntry()
 	entry.Text = strconv.FormatFloat(mosaicRatio, 'f', -1, 64)
 	entry.Refresh()
-	
+
 	//Onchange
 	slider.OnChanged = func(newRatio float64) {
-		mosaicRatio = newRatio
-		entry.Text = strconv.FormatFloat(mosaicRatio, 'f', -1, 64)
+		rounded := roundFloat(newRatio)
+		mosaicRatio = rounded
+		entry.Text = strconv.FormatFloat(rounded, 'f', -1, 64)
 		entry.Refresh()
 		mosaicEffect()
 	}
@@ -104,8 +104,9 @@ func settingsScreen() *fyne.Container {
 		if err != nil {
 			return
 		}
-		mosaicRatio := newRatio
-		slider.Value = mosaicRatio
+		rounded := roundFloat(newRatio)
+		mosaicRatio = rounded
+		slider.Value = rounded
 		slider.Refresh()
 		mosaicEffect()
 	}

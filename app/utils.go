@@ -2,6 +2,7 @@ package main
 
 import(
 	"log"
+	"math"
 	"bytes"
 	"errors"
 	"io"
@@ -58,17 +59,23 @@ func previewImage(img image.Image) image.Image {
 	//Get Ratio
 	rawRatio = 1.0
 	if w > 300 || h > 300 {
+		wRatio := 1.0
 		if w > 300 {
-			rawRatio = w/300
+			wRatio = w/300
 		}
 		
-		if h/rawRatio > 300 {
-			rawRatio = h/300/rawRatio
+		hRatio := 1.0
+		if h/wRatio > 300 {
+			hRatio = h/rawRatio/300
 		}
+		
+		rawRatio = wRatio*hRatio
 	}
 	
+	//log.Println("Preview Image", w/rawRatio, h/rawRatio, rawRatio)
+	
 	//Resize
-	return imaging.Resize(img, int(w/rawRatio), int(h/rawRatio), imaging.NearestNeighbor)
+	return imaging.Resize(img, int(w/rawRatio), int(h/rawRatio), mosaicMethod)
 }
 
 func createMosaic(ratio float64, img image.Image) image.Image {
@@ -77,8 +84,8 @@ func createMosaic(ratio float64, img image.Image) image.Image {
 	w, h := float64(size.Max.X), float64(size.Max.Y)
 	
 	//Mosaic
-	down := imaging.Resize(img, int(w*ratio), int(h*ratio), imaging.NearestNeighbor)
-	return imaging.Resize(down, int(w), int(h), imaging.NearestNeighbor)
+	down := imaging.Resize(img, int(w*ratio), int(h*ratio), mosaicMethod)
+	return imaging.Resize(down, int(w), int(h), mosaicMethod)
 }
 
 func saveImage(w io.Writer, img image.Image) error {
@@ -93,3 +100,10 @@ func saveImage(w io.Writer, img image.Image) error {
 			return errors.New("Invalid extension: " + ext)
 	}
 }
+
+func roundFloat(input float64) float64 {
+	return math.Floor(input * 100000)/100000
+}
+
+//Mosaic Method
+var mosaicMethod imaging.ResampleFilter = imaging.NearestNeighbor
