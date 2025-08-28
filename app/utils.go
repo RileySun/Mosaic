@@ -107,3 +107,21 @@ func roundFloat(input float64) float64 {
 
 //Mosaic Method
 var mosaicMethod imaging.ResampleFilter = imaging.NearestNeighbor
+func setMosiacMethod(newMethod string) {
+	switch newMethod {
+		case "NearestNeighbor":
+			mosaicMethod = imaging.NearestNeighbor
+		case "Lanczos":
+			mosaicMethod = imaging.Lanczos
+		case "CatmullRom":
+			mosaicMethod = imaging.CatmullRom
+		case "MitchellNetravali":
+			mosaicMethod = imaging.MitchellNetravali
+		case "Linear":
+			mosaicMethod = imaging.Linear
+		case "Box":
+			mosaicMethod = imaging.Box
+	}
+	
+	mosaicEffect()
+}

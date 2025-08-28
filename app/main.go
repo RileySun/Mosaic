@@ -90,6 +90,10 @@ func settingsScreen() *fyne.Container {
 	entry :=  widget.NewEntry()
 	entry.Text = strconv.FormatFloat(mosaicRatio, 'f', -1, 64)
 	entry.Refresh()
+	
+	//Menu
+	menu := widget.NewSelect([]string{"NearestNeighbor", "Lanczos", "CatmullRom", "MitchellNetravali", "Linear", "Box"}, setMosiacMethod)
+	menu.Selected = "NearestNeighbor"
 
 	//Onchange
 	slider.OnChanged = func(newRatio float64) {
@@ -111,7 +115,7 @@ func settingsScreen() *fyne.Container {
 		mosaicEffect()
 	}
 	
-	content := container.NewVBox(spacer, label, slider, entry, spacer)
+	content := container.NewVBox(spacer, label, slider, entry, menu, spacer)
 	
 	return container.NewStack(content)
 }
